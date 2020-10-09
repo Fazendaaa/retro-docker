@@ -1,0 +1,48 @@
+FROM alpine:3.12 AS BUILDER
+LABEL author="Fazendaaa"
+LABEL project="retro-docker"
+
+RUN [ "apk", "add", "--no-cache", \
+  "alpine-sdk==1.0-r0", \
+  # "clang==10.0.0-r2", \
+  "cmake==3.17.2-r0", \
+  "git==2.26.2-r0", \
+  "python2==2.7.18-r0", \
+  "python3==3.8.5-r0" \
+]
+
+RUN [ "git", "clone", "https://github.com/emscripten-core/emscripten-fastcomp.git", \
+  "/usr/src/emscripten-fastcomp" ]
+RUN [ "git", "clone", "https://github.com/emscripten-core/emscripten-fastcomp-clang.git ", \
+  "/usr/src/emscripten-fastcomp/tools/clang" ]
+RUN [ "git", "clone", "https://github.com/emscripten-core/emsdk.git", \
+  "/usr/src/emsdk" ]
+RUN [ "git", "clone", "https://github.com/libretro/libretro-fceumm.git", \
+  "/usr/src/retroarch/libreto-fceumm" ]
+RUN [ "git", "clone", "https://github.com/libretro/RetroArch.git", \
+  "/usr/src/retroarch/RetroArch" ]
+
+WORKDIR /usr/src/emsdk
+
+RUN ./emsdk install sdk-fastcomp-master-64bit
+RUN ./emsdk install binaryen-master-64bit
+RUN ./emsdk activate binaryen-master-64bit
+RUN ./emsdk activate sdk-fastcomp-master-64bit
+
+WORKDIR /usr/src/emscripten-fastcomp/build
+
+RUN cmake .. -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD="host;JSBackend" \
+-DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DCLANG_INCLUDE_TESTS=OFF
+
+RUN make -j`nproc`
+
+WORKDIR /usr/src/retroarch/libreto-fceumm
+
+RUN emmake make -f Makefile.libretro platform=emscripten
+
+RUN cp /retroarch/libretro-fceumm/fceumm_libretro_emscripten.bc \
+/retroarch/RetroArch/dist-scripts/fceumm_libretro_emscripten.bc
+
+WORKDIR /usr/src/retroarch/RetroArch/dist-scripts
+
+RUN emmake ./dist-cores.sh emscripten

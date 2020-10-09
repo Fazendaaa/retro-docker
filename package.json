@@ -1,0 +1,19 @@
+{
+  "name": "retro-docker",
+  "version": "1.0.0",
+  "description": "A [RetroArch]() containerized approach to make it able to play your retro games in the following devices:",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Fazendaaa/retro-docker.git"
+  },
+  "author": "Fazendaaa",
+  "license": "GPL-2.0",
+  "bugs": {
+    "url": "https://github.com/Fazendaaa/retro-docker/issues"
+  },
+  "homepage": "https://github.com/Fazendaaa/retro-docker#readme"
+}
